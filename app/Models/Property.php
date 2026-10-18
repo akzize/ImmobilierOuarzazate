@@ -64,6 +64,18 @@ class Property extends Model
         ];
     }
 
+    /**
+     * Mark the first photo as cover when none is marked.
+     */
+    public function ensureCoverImage(): void
+    {
+        if ($this->images()->where('is_cover', true)->exists()) {
+            return;
+        }
+
+        $this->images()->first()?->update(['is_cover' => true]);
+    }
+
     #[Scope]
     protected function published(Builder $query): Builder
     {

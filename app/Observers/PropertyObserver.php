@@ -37,6 +37,14 @@ class PropertyObserver
         }
     }
 
+    /**
+     * Delete images through the model so their files are removed (the FK cascade skips model events).
+     */
+    public function deleting(Property $property): void
+    {
+        $property->images->each->delete();
+    }
+
     private function nextReference(): string
     {
         $prefix = Property::REFERENCE_PREFIX.'-'.now()->year.'-';

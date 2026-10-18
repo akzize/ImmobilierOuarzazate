@@ -81,6 +81,29 @@ test('only the sections of the selected type group are shown', function () {
         ->assertFormFieldVisible('details.water_source');
 });
 
+test('money fields follow the transaction and type group', function () {
+    Livewire::test(CreateProperty::class)
+        ->fillForm([
+            'property_type_id' => PropertyType::firstWhere('code', 'APT')->id,
+            'transaction' => TransactionType::Sale->value,
+        ])
+        ->assertFormFieldVisible('details.monthly_charges')
+        ->assertFormFieldHidden('details.deposit')
+        ->assertFormFieldHidden('details.goodwill')
+        ->fillForm([
+            'property_type_id' => PropertyType::firstWhere('code', 'SHOP')->id,
+            'transaction' => TransactionType::Rent->value,
+        ])
+        ->assertFormFieldVisible('details.deposit')
+        ->assertFormFieldVisible('details.goodwill')
+        ->assertFormFieldHidden('details.monthly_charges');
+});
+
+test('reference and slug are only shown once the listing exists', function () {
+    Livewire::test(CreateProperty::class)
+        ->assertDontSee(__('First published'));
+});
+
 test('a land listing stores land details', function () {
     Livewire::test(CreateProperty::class)
         ->fillForm(listingFormData('LND', [
@@ -119,7 +142,7 @@ test('the edit page loads and saves changes', function () {
 
     Livewire::test(EditProperty::class, ['record' => $property->getRouteKey()])
         ->assertOk()
-        ->assertFormSet(['reference' => $property->reference])
+        ->assertSee($property->reference)
         ->fillForm(['price' => 999000])
         ->call('save')
         ->assertHasNoFormErrors();

@@ -18,7 +18,17 @@ class PropertyResource extends Resource
 {
     protected static ?string $model = Property::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedHomeModern;
+
+    protected static ?string $recordTitleAttribute = 'reference';
+
+    /**
+     * @return list<string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['reference', 'title_ar', 'title_en'];
+    }
 
     public static function form(Schema $schema): Schema
     {
