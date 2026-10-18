@@ -119,6 +119,13 @@ test('a land listing stores land details', function () {
     ]);
 });
 
+test('the create wizard validates the listing details step before moving on', function () {
+    Livewire::test(CreateProperty::class)
+        ->fillForm(['title_ar' => null])
+        ->goToNextWizardStep()
+        ->assertHasFormErrors(['property_type_id' => 'required', 'title_ar' => 'required', 'price' => 'required']);
+});
+
 test('required fields are validated', function () {
     Livewire::test(CreateProperty::class)
         ->fillForm(listingFormData('APT', ['title_ar' => null, 'price' => null]))

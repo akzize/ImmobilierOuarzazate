@@ -18,17 +18,19 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Fieldset;
-use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Wizard;
+use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
- * Two-column layout: listing content on the left, publishing controls on the right.
+ * Two-step wizard: listing details, then photos & publishing.
+ * The create page walks through the steps in order (CreateProperty::getSteps()); the edit page can jump between them.
  * Type-specific fields are stored in the `details` JSON column (see docs/architecture.md, A.3).
  */
 class PropertyForm
@@ -36,23 +38,40 @@ class PropertyForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
-            ->columns(3)
+            ->columns(1)
             ->components([
-                Group::make([
+                Wizard::make(self::steps())
+                    ->skippable(),
+            ]);
+    }
+
+    /**
+     * @return array<Step>
+     */
+    public static function steps(): array
+    {
+        return [
+            Step::make(__('Listing details'))
+                ->description(__('Type, texts, price and characteristics'))
+                ->icon('heroicon-o-home-modern')
+                ->schema([
                     self::basicsSection(),
                     self::contentSection(),
-                    self::photosSection(),
                     self::priceSection(),
                     self::builtSection(),
                     self::landSection(),
                     self::commercialSection(),
                     self::mapAndMediaSection(),
-                    self::privateSection(),
-                ])->columnSpan(['lg' => 2]),
-                Group::make([
+                ]),
+            Step::make(__('Photos & publishing'))
+                ->description(__('Gallery, status and private information'))
+                ->icon('heroicon-o-photo')
+                ->schema([
+                    self::photosSection(),
                     self::publishingSection(),
-                ])->columnSpan(['lg' => 1]),
-            ]);
+                    self::privateSection(),
+                ]),
+        ];
     }
 
     private static function basicsSection(): Section
@@ -82,6 +101,7 @@ class PropertyForm
     private static function publishingSection(): Section
     {
         return Section::make(__('Publishing'))
+            ->columns(2)
             ->schema([
                 Select::make('status')
                     ->options(PropertyStatus::class)
@@ -89,6 +109,7 @@ class PropertyForm
                     ->required()
                     ->live(),
                 Toggle::make('featured')
+                    ->inline(false)
                     ->helperText(__('Shown first on the home page.')),
                 TextEntry::make('reference')
                     ->hiddenOn('create'),
