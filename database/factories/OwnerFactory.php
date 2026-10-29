@@ -20,7 +20,9 @@ class OwnerFactory extends Factory
         return [
             'name_en' => fake()->name(),
             'name_ar' => null,
-            'phone' => fake()->phoneNumber(),
+            'phone' => fake()->numerify('06########'),
+            'email' => fake()->optional()->safeEmail(),
+            'notes' => null,
         ];
     }
 }

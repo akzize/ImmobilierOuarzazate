@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * Internal only: owners are never exposed on the public site.
  */
-#[Fillable(['name_en', 'name_ar', 'phone'])]
+#[Fillable(['name_en', 'name_ar', 'phone', 'email', 'notes'])]
 class Owner extends Model
 {
     /** @use HasFactory<OwnerFactory> */

@@ -7,6 +7,7 @@ use App\Enums\PropertyGroup;
 use App\Enums\PropertyStatus;
 use App\Enums\TransactionType;
 use App\Filament\Forms\Components\MapPicker;
+use App\Filament\Resources\Owners\Schemas\OwnerForm;
 use App\Models\PropertyImage;
 use App\Models\PropertyType;
 use Filament\Forms\Components\CheckboxList;
@@ -427,11 +428,7 @@ class PropertyForm
                     ->relationship('owner', 'name_en')
                     ->searchable(['name_en', 'name_ar', 'phone'])
                     ->preload()
-                    ->createOptionForm([
-                        TextInput::make('name_en')->label(__('Name (English)'))->required()->maxLength(255),
-                        TextInput::make('name_ar')->label(__('Name (Arabic)'))->maxLength(255),
-                        TextInput::make('phone')->tel()->maxLength(30),
-                    ]),
+                    ->createOptionForm(fn (Schema $schema): Schema => OwnerForm::configure($schema)),
                 TextInput::make('address')
                     ->maxLength(255),
                 Textarea::make('internal_notes')
