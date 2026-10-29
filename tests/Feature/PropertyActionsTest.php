@@ -58,6 +58,25 @@ test('a listing is archived from its view page', function () {
     expect($property->fresh()->status)->toBe(PropertyStatus::Archived);
 });
 
+test('marking a listing as sold records the final price and date of the deal', function () {
+    $property = Property::factory()->published()->create(['price' => 900000]);
+    $closingDate = today()->subDays(3)->toDateString();
+
+    Livewire::test(ListProperties::class)
+        ->callAction(TestAction::make('markAsSoldOrRented')->table($property), data: [
+            'closed_price' => 850000,
+            'closed_at' => $closingDate,
+        ])
+        ->assertHasNoFormErrors()
+        ->assertNotified('Listing marked as Sold / Rented');
+
+    $property->refresh();
+
+    expect($property->status)->toBe(PropertyStatus::SoldOrRented)
+        ->and($property->closed_price)->toBe('850000.00')
+        ->and($property->closed_at->toDateString())->toBe($closingDate);
+});
+
 test('a bulk status change updates every selected listing', function () {
     $properties = Property::factory()->count(2)->published()->create();
 

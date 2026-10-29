@@ -92,9 +92,25 @@ test('published_at is stamped on first publication only', function () {
 test('private fields are never serialized', function () {
     $property = Property::factory()
         ->for(Owner::factory())
-        ->create(['address' => 'Hay Al Wahda, Ouarzazate', 'internal_notes' => 'Owner abroad']);
+        ->create(['address' => 'Hay Al Wahda, Ouarzazate', 'internal_notes' => 'Owner abroad', 'status' => PropertyStatus::SoldOrRented]);
 
-    expect($property->toArray())->not->toHaveKeys(['owner_id', 'address', 'internal_notes']);
+    expect($property->toArray())->not->toHaveKeys(['owner_id', 'address', 'internal_notes', 'closed_price', 'closed_at']);
+});
+
+test('a sale defaults to the asking price and putting the listing back on the market clears it', function () {
+    $property = Property::factory()->published()->create(['price' => 500000]);
+
+    $property->update(['status' => PropertyStatus::SoldOrRented]);
+
+    expect($property->fresh())
+        ->closed_price->toBe('500000.00')
+        ->closed_at->not->toBeNull();
+
+    $property->update(['status' => PropertyStatus::Published]);
+
+    expect($property->fresh())
+        ->closed_price->toBeNull()
+        ->closed_at->toBeNull();
 });
 
 test('published scope only returns published listings', function () {

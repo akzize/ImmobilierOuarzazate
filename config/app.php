@@ -73,11 +73,12 @@ return [
     |
     | Here you may specify the default timezone for your application, which
     | will be used by the PHP date and date-time functions. The timezone
-    | is set to "UTC" by default as it is suitable for most use cases.
+    | is set to Morocco so "today", "this week" and monthly figures on the
+    | dashboard follow the agency's clock.
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Africa/Casablanca',
 
     /*
     |--------------------------------------------------------------------------

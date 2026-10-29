@@ -20,17 +20,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
- * A listing. `reference`, `slug` and `published_at` are filled by PropertyObserver.
- * `owner_id`, `address` and `internal_notes` are private and must never reach the public site.
+ * A listing. `reference`, `slug`, `published_at` and the closing defaults are filled by PropertyObserver.
+ * `owner_id`, `address`, `internal_notes` and the deal figures (`closed_price`, `closed_at`) are private and must never reach the public site.
  */
 #[Fillable([
     'property_type_id', 'city_id', 'transaction', 'status', 'featured',
     'title_ar', 'title_en', 'description_ar', 'description_en',
     'price', 'price_negotiable', 'surface_m2', 'built_area_m2', 'bedrooms', 'bathrooms',
     'latitude', 'longitude', 'boundary', 'legal_title', 'video_url', 'details',
-    'owner_id', 'address', 'internal_notes',
+    'owner_id', 'address', 'internal_notes', 'closed_price', 'closed_at',
 ])]
-#[Hidden(['owner_id', 'address', 'internal_notes'])]
+#[Hidden(['owner_id', 'address', 'internal_notes', 'closed_price', 'closed_at'])]
 #[ObservedBy([PropertyObserver::class])]
 class Property extends Model
 {
@@ -58,6 +58,7 @@ class Property extends Model
             'featured' => 'boolean',
             'price_negotiable' => 'boolean',
             'price' => 'decimal:2',
+            'closed_price' => 'decimal:2',
             'surface_m2' => 'decimal:2',
             'built_area_m2' => 'decimal:2',
             'bedrooms' => 'integer',
@@ -67,6 +68,7 @@ class Property extends Model
             'boundary' => 'array',
             'details' => 'array',
             'published_at' => 'datetime',
+            'closed_at' => 'datetime',
         ];
     }
 

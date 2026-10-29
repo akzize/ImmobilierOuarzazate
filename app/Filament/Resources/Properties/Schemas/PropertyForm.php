@@ -11,6 +11,7 @@ use App\Filament\Resources\Owners\Schemas\OwnerForm;
 use App\Models\PropertyImage;
 use App\Models\PropertyType;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
@@ -20,6 +21,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -106,6 +108,27 @@ class PropertyForm
             ]);
     }
 
+    /**
+     * Final price and date of a deal, also asked by the "Mark as sold / rented" action.
+     *
+     * @return array<TextInput|DatePicker>
+     */
+    public static function closingFields(): array
+    {
+        return [
+            TextInput::make('closed_price')
+                ->label(__('Final price'))
+                ->numeric()
+                ->minValue(0)
+                ->prefix('MAD')
+                ->required(),
+            DatePicker::make('closed_at')
+                ->label(__('Closing date'))
+                ->maxDate(now())
+                ->required(),
+        ];
+    }
+
     private static function publishingSection(): Section
     {
         return Section::make(__('Publishing'))
@@ -119,6 +142,10 @@ class PropertyForm
                 Toggle::make('featured')
                     ->inline(false)
                     ->helperText(__('Shown first on the home page.')),
+                Group::make(self::closingFields())
+                    ->columns(2)
+                    ->columnSpanFull()
+                    ->visible(fn (Get $get): bool => self::status($get) === PropertyStatus::SoldOrRented),
                 TextEntry::make('reference')
                     ->hiddenOn('create'),
                 TextEntry::make('slug')

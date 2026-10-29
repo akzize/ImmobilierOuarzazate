@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Properties\Actions;
 
 use App\Enums\PropertyStatus;
+use App\Filament\Resources\Properties\Schemas\PropertyForm;
 use App\Models\Property;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -73,15 +74,18 @@ class PropertyActions
             ->visible(fn (Property $record): bool => $record->publicUrl() !== null);
     }
 
+    /**
+     * Marking a listing as sold or rented also asks for the final price and date of the deal.
+     */
     private static function changeStatusTo(PropertyStatus $status): Action
     {
-        return Action::make(Str::camel('mark_as_'.$status->value))
+        $action = Action::make(Str::camel('mark_as_'.$status->value))
             ->label($status->getActionLabel())
             ->icon($status->getIcon())
             ->color($status->getColor())
             ->requiresConfirmation()
             ->visible(fn (Property $record): bool => $record->status !== $status)
-            ->action(function (Action $action, Property $record) use ($status): void {
+            ->action(function (Action $action, Property $record, array $data) use ($status): void {
                 if ($status === PropertyStatus::Published && ! $record->canBePublished()) {
                     $action->failureNotificationTitle(__('Add at least one photo before publishing.'));
                     $action->failure();
@@ -89,8 +93,20 @@ class PropertyActions
                     return;
                 }
 
-                $record->update(['status' => $status]);
+                $record->update(['status' => $status, ...$data]);
             })
             ->successNotificationTitle(__('Listing marked as :status', ['status' => $status->getLabel()]));
+
+        if ($status === PropertyStatus::SoldOrRented) {
+            $action
+                ->modalDescription(__('Record the final price and date of the deal.'))
+                ->schema(PropertyForm::closingFields())
+                ->fillForm(fn (Property $record): array => [
+                    'closed_price' => $record->price,
+                    'closed_at' => now()->toDateString(),
+                ]);
+        }
+
+        return $action;
     }
 }

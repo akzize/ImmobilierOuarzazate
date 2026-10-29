@@ -28,12 +28,21 @@ class PropertyObserver
     }
 
     /**
-     * Stamp the first publication date.
+     * Stamp the first publication date, and the deal figures when the listing is sold or rented
+     * (the asking price and today unless given). Putting the listing back on the market clears them.
      */
     public function saving(Property $property): void
     {
         if ($property->status === PropertyStatus::Published && $property->published_at === null) {
             $property->published_at = now();
+        }
+
+        if ($property->status === PropertyStatus::SoldOrRented) {
+            $property->closed_price ??= $property->price;
+            $property->closed_at ??= now();
+        } else {
+            $property->closed_price = null;
+            $property->closed_at = null;
         }
     }
 

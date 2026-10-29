@@ -36,7 +36,7 @@ class InquiryActions
     /**
      * Closing (won or lost) asks for confirmation; the other moves are one click.
      */
-    private static function changeStatusTo(InquiryStatus $status): Action
+    public static function changeStatusTo(InquiryStatus $status): Action
     {
         return Action::make(Str::camel('mark_as_'.$status->value))
             ->label($status->getActionLabel())

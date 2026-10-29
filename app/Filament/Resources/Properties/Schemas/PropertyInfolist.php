@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Properties\Schemas;
 
+use App\Enums\PropertyStatus;
 use App\Enums\TransactionType;
 use App\Filament\Infolists\Components\MapEntry;
 use App\Models\Property;
@@ -213,6 +214,14 @@ class PropertyInfolist
                 TextEntry::make('internal_notes')
                     ->label(__('Internal notes'))
                     ->placeholder('—'),
+                TextEntry::make('closed_price')
+                    ->label(__('Final price'))
+                    ->money('MAD', decimalPlaces: 0)
+                    ->visible(fn (Property $record): bool => $record->status === PropertyStatus::SoldOrRented),
+                TextEntry::make('closed_at')
+                    ->label(__('Closing date'))
+                    ->date()
+                    ->visible(fn (Property $record): bool => $record->status === PropertyStatus::SoldOrRented),
             ]);
     }
 
