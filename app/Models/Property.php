@@ -27,7 +27,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'property_type_id', 'city_id', 'transaction', 'status', 'featured',
     'title_ar', 'title_en', 'description_ar', 'description_en',
     'price', 'price_negotiable', 'surface_m2', 'built_area_m2', 'bedrooms', 'bathrooms',
-    'latitude', 'longitude', 'legal_title', 'video_url', 'details',
+    'latitude', 'longitude', 'boundary', 'legal_title', 'video_url', 'details',
     'owner_id', 'address', 'internal_notes',
 ])]
 #[Hidden(['owner_id', 'address', 'internal_notes'])]
@@ -38,6 +38,11 @@ class Property extends Model
     use HasFactory;
 
     public const string REFERENCE_PREFIX = 'OZZ';
+
+    /**
+     * Listings on the market longer than this are flagged as stale.
+     */
+    public const int STALE_AFTER_DAYS = 90;
 
     /**
      * Get the attributes that should be cast.
@@ -59,6 +64,7 @@ class Property extends Model
             'bathrooms' => 'integer',
             'latitude' => 'decimal:7',
             'longitude' => 'decimal:7',
+            'boundary' => 'array',
             'details' => 'array',
             'published_at' => 'datetime',
         ];
@@ -74,6 +80,57 @@ class Property extends Model
         }
 
         $this->images()->first()?->update(['is_cover' => true]);
+    }
+
+    /**
+     * Append photos after the existing ones, in the given order.
+     *
+     * @param  array<string>  $paths
+     */
+    public function addImages(array $paths): void
+    {
+        $lastPosition = (int) $this->images()->reorder()->max('position');
+
+        foreach (array_values($paths) as $offset => $path) {
+            $this->images()->create([
+                'path' => $path,
+                'position' => $lastPosition + $offset + 1,
+            ]);
+        }
+    }
+
+    /**
+     * Whole days since first publication, while the listing is still on the market.
+     */
+    public function daysOnMarket(): ?int
+    {
+        if ($this->published_at === null || ! $this->status->isOnMarket()) {
+            return null;
+        }
+
+        return (int) $this->published_at->diffInDays(now());
+    }
+
+    /**
+     * A listing needs at least one photo before it can go live.
+     */
+    public function canBePublished(): bool
+    {
+        return $this->images()->exists();
+    }
+
+    /**
+     * The listing's page on the public website; null while it is not published or the website URL is not configured.
+     */
+    public function publicUrl(): ?string
+    {
+        $frontendUrl = config('app.frontend_url');
+
+        if (blank($frontendUrl) || $this->status !== PropertyStatus::Published) {
+            return null;
+        }
+
+        return rtrim($frontendUrl, '/').'/marketplace/'.$this->slug;
     }
 
     #[Scope]
