@@ -9,15 +9,11 @@ use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
-use Illuminate\Support\Arr;
 use Illuminate\Validation\Rules\Password;
 use UnitEnum;
 
@@ -54,11 +50,6 @@ class UserResource extends Resource
                     ->required(fn (string $operation): bool => $operation === 'create')
                     ->dehydrated(fn (?string $state): bool => filled($state))
                     ->helperText(fn (string $operation): ?string => $operation === 'edit' ? __('Leave blank to keep the current password.') : null),
-                Toggle::make('is_admin')
-                    ->label(__('Can use the admin panel'))
-                    ->default(true)
-                    ->disabled(fn (?User $record): bool => $record?->is(auth()->user()) ?? false)
-                    ->helperText(fn (?User $record): ?string => $record?->is(auth()->user()) ? __('You cannot remove your own access.') : null),
             ]);
     }
 
@@ -71,43 +62,16 @@ class UserResource extends Resource
                     ->searchable(),
                 TextColumn::make('email')
                     ->searchable(),
-                IconColumn::make('is_admin')
-                    ->label(__('Admin access'))
-                    ->boolean(),
                 TextColumn::make('created_at')
                     ->label(__('Added'))
                     ->date()
                     ->sortable(),
             ])
-            ->filters([
-                TernaryFilter::make('is_admin')
-                    ->label(__('Admin access')),
-            ])
             ->recordActions([
-                EditAction::make()
-                    ->using(fn (User $record, array $data): User => self::saveUser($record, $data)),
+                EditAction::make(),
                 DeleteAction::make()
                     ->hidden(fn (User $record): bool => $record->is(auth()->user())),
             ]);
-    }
-
-    /**
-     * `is_admin` is deliberately not mass assignable, so it is set explicitly here.
-     * It is missing from $data when the toggle is disabled (own account), which leaves it unchanged.
-     *
-     * @param  array<string, mixed>  $data
-     */
-    public static function saveUser(User $user, array $data): User
-    {
-        $user->fill(Arr::except($data, 'is_admin'));
-
-        if (array_key_exists('is_admin', $data)) {
-            $user->is_admin = (bool) $data['is_admin'];
-        }
-
-        $user->save();
-
-        return $user;
     }
 
     public static function getPages(): array

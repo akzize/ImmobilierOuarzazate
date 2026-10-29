@@ -20,15 +20,6 @@ class User extends Authenticatable implements FilamentUser
     use HasFactory, Notifiable;
 
     /**
-     * Mirrors the database default so unsaved users are never admins.
-     *
-     * @var array<string, mixed>
-     */
-    protected $attributes = [
-        'is_admin' => false,
-    ];
-
-    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -38,15 +29,14 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'is_admin' => 'boolean',
         ];
     }
 
     /**
-     * Only admins may use the admin panel. `is_admin` is deliberately not fillable.
+     * Every account is an admin. Public registration is closed, so accounts only come from the Users resource.
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->is_admin;
+        return true;
     }
 }

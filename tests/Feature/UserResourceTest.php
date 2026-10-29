@@ -10,7 +10,7 @@ use Livewire\Livewire;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->admin = User::factory()->admin()->create();
+    $this->admin = User::factory()->create();
     $this->actingAs($this->admin);
 });
 
@@ -20,7 +20,6 @@ test('an admin creates another admin account', function () {
             'name' => 'Salma Bennani',
             'email' => 'salma@example.com',
             'password' => 'Secret-Passw0rd!',
-            'is_admin' => true,
         ])
         ->assertHasNoFormErrors();
 
@@ -28,7 +27,6 @@ test('an admin creates another admin account', function () {
 
     expect($user)
         ->name->toBe('Salma Bennani')
-        ->is_admin->toBeTrue()
         ->and(Hash::check('Secret-Passw0rd!', $user->password))->toBeTrue();
 });
 
@@ -53,7 +51,7 @@ test('an email already in use is rejected', function () {
 });
 
 test('editing an account without a password keeps the current one', function () {
-    $user = User::factory()->admin()->create(['password' => 'Old-Passw0rd!']);
+    $user = User::factory()->create(['password' => 'Old-Passw0rd!']);
 
     Livewire::test(ManageUsers::class)
         ->callAction(TestAction::make('edit')->table($user), data: ['name' => 'Renamed', 'password' => ''])
@@ -65,26 +63,8 @@ test('editing an account without a password keeps the current one', function () 
         ->and(Hash::check('Old-Passw0rd!', $user->password))->toBeTrue();
 });
 
-test('an admin revokes the panel access of another account', function () {
-    $user = User::factory()->admin()->create();
-
-    Livewire::test(ManageUsers::class)
-        ->callAction(TestAction::make('edit')->table($user), data: ['is_admin' => false])
-        ->assertHasNoFormErrors();
-
-    expect($user->fresh()->is_admin)->toBeFalse();
-});
-
-test('admins cannot remove their own panel access', function () {
-    Livewire::test(ManageUsers::class)
-        ->callAction(TestAction::make('edit')->table($this->admin), data: ['is_admin' => false])
-        ->assertHasNoFormErrors();
-
-    expect($this->admin->fresh()->is_admin)->toBeTrue();
-});
-
 test('admins cannot delete their own account', function () {
-    $otherAdmin = User::factory()->admin()->create();
+    $otherAdmin = User::factory()->create();
 
     Livewire::test(ManageUsers::class)
         ->assertActionHidden(TestAction::make('delete')->table($this->admin))

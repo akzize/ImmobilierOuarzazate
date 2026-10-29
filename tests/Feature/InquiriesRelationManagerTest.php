@@ -14,7 +14,7 @@ use Livewire\Livewire;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->actingAs(User::factory()->admin()->create());
+    $this->actingAs(User::factory()->create());
 });
 
 test('only the inquiries of the listing are shown', function () {

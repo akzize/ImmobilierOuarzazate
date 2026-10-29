@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
             AmenitySeeder::class,
         ]);
 
-        User::factory()->admin()->create([
+        User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);

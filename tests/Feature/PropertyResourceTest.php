@@ -31,7 +31,7 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     $this->seed(PropertyTypeSeeder::class);
     $this->city = City::factory()->create();
-    $this->actingAs(User::factory()->admin()->create());
+    $this->actingAs(User::factory()->create());
 });
 
 /**

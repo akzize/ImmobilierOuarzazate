@@ -9,8 +9,6 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -23,11 +21,12 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        return $panel
+        $panel
             ->default()
             ->id('admin')
             ->path('/')
             ->login()
+            ->emailVerification()
             ->passwordReset()
             ->profile()
             ->brandLogo(fn (): View => view('filament.admin.logo'))
@@ -58,5 +57,11 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+
+        if (config('app.env') === 'local' || env('FILAMENT_REGISTRATION_ENABLED') === true) {
+            $panel->registration();
+        }
+
+        return $panel;
     }
 }

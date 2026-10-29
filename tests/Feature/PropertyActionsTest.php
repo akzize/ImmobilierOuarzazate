@@ -13,7 +13,7 @@ use Livewire\Livewire;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->actingAs(User::factory()->admin()->create());
+    $this->actingAs(User::factory()->create());
 });
 
 test('a listing with a photo is published from the table', function () {
