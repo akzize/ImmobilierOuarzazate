@@ -27,4 +27,12 @@ enum InquirySource: string implements HasLabel
             self::Social => __('Social media'),
         };
     }
+
+    /**
+     * Sent by a visitor through the website, as opposed to logged by an admin.
+     */
+    public function isFromWebsite(): bool
+    {
+        return in_array($this, [self::Form, self::VisitForm], true);
+    }
 }

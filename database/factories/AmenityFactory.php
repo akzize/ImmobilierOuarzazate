@@ -18,7 +18,7 @@ class AmenityFactory extends Factory
     public function definition(): array
     {
         return [
-            'code' => fake()->unique()->slug(2),
+            'code' => fake()->unique()->regexify('[a-z]{6}_[a-z]{6}'),
             'label_ar' => fake()->word(),
             'label_en' => fake()->word(),
         ];

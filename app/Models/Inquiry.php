@@ -5,11 +5,13 @@ namespace App\Models;
 use App\Enums\InquirySource;
 use App\Enums\InquiryStatus;
 use App\Enums\Language;
+use App\Notifications\NewInquiryReceived;
 use Database\Factories\InquiryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Notification;
 
 #[Fillable(['property_id', 'full_name', 'phone', 'email', 'message', 'lang', 'source', 'preferred_visit_at', 'status', 'admin_notes'])]
 class Inquiry extends Model
@@ -34,7 +36,8 @@ class Inquiry extends Model
     ];
 
     /**
-     * Stamp the first reply and the closing date from the status, whichever screen changes it.
+     * Stamp the first reply and the closing date from the status, whichever screen changes it,
+     * and alert the admins about inquiries from the website.
      */
     protected static function booted(): void
     {
@@ -44,6 +47,12 @@ class Inquiry extends Model
             }
 
             $inquiry->closed_at = $inquiry->status->isClosed() ? ($inquiry->closed_at ?? now()) : null;
+        });
+
+        static::created(function (Inquiry $inquiry): void {
+            if ($inquiry->source->isFromWebsite()) {
+                Notification::send(User::all(), new NewInquiryReceived($inquiry));
+            }
         });
     }
 

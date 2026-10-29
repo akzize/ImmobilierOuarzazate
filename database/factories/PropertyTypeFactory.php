@@ -19,7 +19,7 @@ class PropertyTypeFactory extends Factory
     public function definition(): array
     {
         return [
-            'code' => fake()->unique()->lexify('??????'),
+            'code' => fake()->unique()->regexify('[A-Z]{6}'),
             'group' => fake()->randomElement(PropertyGroup::cases()),
             'label_ar' => fake()->word(),
             'label_en' => fake()->unique()->word(),
