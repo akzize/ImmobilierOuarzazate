@@ -56,6 +56,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Public Website URL
+    |--------------------------------------------------------------------------
+    |
+    | Root URL of the public React website. The admin panel uses it to link
+    | to published listings. Leave it empty to hide those links.
+    |
+    */
+
+    'frontend_url' => env('FRONTEND_URL'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |
