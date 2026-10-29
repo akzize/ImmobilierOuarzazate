@@ -6,6 +6,7 @@ use App\Enums\LegalTitle;
 use App\Enums\PropertyGroup;
 use App\Enums\PropertyStatus;
 use App\Enums\TransactionType;
+use App\Filament\Forms\Components\MapPicker;
 use App\Models\PropertyImage;
 use App\Models\PropertyType;
 use Filament\Forms\Components\CheckboxList;
@@ -35,6 +36,11 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class PropertyForm
 {
+    /**
+     * Bulk photo drop zone. Not a column: the create and edit pages turn its files into images after saving.
+     */
+    public const string NEW_PHOTOS_FIELD = 'new_photos';
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -61,6 +67,7 @@ class PropertyForm
                     self::builtSection(),
                     self::landSection(),
                     self::commercialSection(),
+                    self::amenitiesSection(),
                     self::mapAndMediaSection(),
                 ]),
             Step::make(__('Photos & publishing'))
@@ -166,26 +173,26 @@ class PropertyForm
             ->description(__('Drag to reorder. At least one photo is required to publish. If no photo is marked as cover, the first one is used.'))
             ->icon('heroicon-o-photo')
             ->schema([
+                self::photoUpload(self::NEW_PHOTOS_FIELD)
+                    ->label(__('Add several photos at once'))
+                    ->helperText(__('Drop all the photos here: they are added after the existing ones, in this order, when you save.'))
+                    ->multiple()
+                    ->reorderable()
+                    ->appendFiles()
+                    ->maxFiles(40)
+                    ->panelLayout('grid'),
                 Repeater::make('images')
                     ->hiddenLabel()
                     ->relationship()
                     ->orderColumn('position')
-                    ->minItems(fn (Get $get): int => self::status($get) === PropertyStatus::Published ? 1 : 0)
+                    ->minItems(fn (Get $get): int => self::status($get) === PropertyStatus::Published && blank($get(self::NEW_PHOTOS_FIELD)) ? 1 : 0)
                     ->defaultItems(0)
                     ->addActionLabel(__('Add photo'))
                     ->itemLabel(fn (array $state): ?string => ($state['is_cover'] ?? false) ? __('Cover photo') : null)
                     ->grid(['default' => 1, 'sm' => 2, 'xl' => 3])
                     ->schema([
-                        FileUpload::make('path')
+                        self::photoUpload('path')
                             ->hiddenLabel()
-                            ->image()
-                            ->disk(PropertyImage::DISK)
-                            ->directory(PropertyImage::DIRECTORY)
-                            ->visibility('public')
-                            ->maxSize(10240)
-                            ->automaticallyResizeImagesMode('contain')
-                            ->automaticallyResizeImagesToWidth('1920')
-                            ->automaticallyResizeImagesToHeight('1920')
                             ->required(),
                         TextInput::make('alt_text')
                             ->hiddenLabel()
@@ -196,6 +203,22 @@ class PropertyForm
                             ->live(),
                     ]),
             ]);
+    }
+
+    /**
+     * Same storage and resizing for single photos and bulk uploads.
+     */
+    private static function photoUpload(string $name): FileUpload
+    {
+        return FileUpload::make($name)
+            ->image()
+            ->disk(PropertyImage::DISK)
+            ->directory(PropertyImage::DIRECTORY)
+            ->visibility('public')
+            ->maxSize(10240)
+            ->automaticallyResizeImagesMode('contain')
+            ->automaticallyResizeImagesToWidth('1920')
+            ->automaticallyResizeImagesToHeight('1920');
     }
 
     private static function priceSection(): Section
@@ -260,14 +283,6 @@ class PropertyForm
                         TextInput::make('details.living_rooms')->label(__('Living rooms / Salons'))->integer()->minValue(0),
                         TextInput::make('details.kitchens')->label(__('Kitchens'))->integer()->minValue(0),
                         TextInput::make('details.parking')->label(__('Parking / Garage spaces'))->integer()->minValue(0),
-                    ]),
-                Fieldset::make(__('Amenities'))
-                    ->schema([
-                        CheckboxList::make('amenities')
-                            ->hiddenLabel()
-                            ->relationship('amenities', 'label_en')
-                            ->columns(['default' => 2, 'md' => 4])
-                            ->columnSpanFull(),
                     ]),
                 Fieldset::make(__('Condition & building'))
                     ->columns(3)
@@ -358,13 +373,31 @@ class PropertyForm
             ]);
     }
 
+    /**
+     * Built properties and commercial units (hotels, offices, shops) both have amenities; land does not.
+     */
+    private static function amenitiesSection(): Section
+    {
+        return Section::make(__('Amenities'))
+            ->visible(fn (Get $get): bool => in_array(self::group($get), [PropertyGroup::Built, PropertyGroup::Commercial], true))
+            ->schema([
+                CheckboxList::make('amenities')
+                    ->hiddenLabel()
+                    ->relationship('amenities', 'label_en')
+                    ->columns(['default' => 2, 'md' => 4]),
+            ]);
+    }
+
     private static function mapAndMediaSection(): Section
     {
-        return Section::make(__('Map & media'))
-            ->compact()
+        return Section::make(__('Location & media'))
+            ->description(__('Click the map to drop the pin, or use the polygon / rectangle tools to draw the outline of the plot. You can also type the coordinates.'))
             ->collapsible()
             ->columns(3)
             ->schema([
+                MapPicker::make('boundary')
+                    ->hiddenLabel()
+                    ->columnSpanFull(),
                 TextInput::make('latitude')
                     ->numeric()
                     ->minValue(-90)
