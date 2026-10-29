@@ -145,6 +145,15 @@ test('required fields are validated', function () {
         ->assertHasFormErrors(['title_ar' => 'required', 'price' => 'required']);
 });
 
+test('the Arabic title and description must be written in Arabic', function () {
+    Livewire::test(CreateProperty::class)
+        ->fillForm(listingFormData('APT', ['title_ar' => 'Villa for sale', 'description_ar' => '<p>Nice villa</p>']))
+        ->call('create')
+        ->assertHasFormErrors(['title_ar', 'description_ar']);
+
+    expect(Property::exists())->toBeFalse();
+});
+
 test('a listing cannot be published without images', function () {
     Livewire::test(CreateProperty::class)
         ->fillForm(listingFormData('APT', ['status' => PropertyStatus::Published->value]))

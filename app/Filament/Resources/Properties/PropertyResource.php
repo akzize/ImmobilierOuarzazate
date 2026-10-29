@@ -29,6 +29,16 @@ class PropertyResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'reference';
 
+    public static function getModelLabel(): string
+    {
+        return __('property');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('properties');
+    }
+
     /**
      * @return list<string>
      */

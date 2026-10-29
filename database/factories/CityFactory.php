@@ -18,7 +18,7 @@ class CityFactory extends Factory
     public function definition(): array
     {
         return [
-            'name_ar' => fake()->city(),
+            'name_ar' => fake()->randomElement(['ورزازات', 'زاكورة', 'سكورة', 'تنغير', 'قلعة مكونة', 'أكدز']),
             'name_en' => fake()->unique()->city(),
         ];
     }

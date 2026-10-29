@@ -16,4 +16,15 @@ enum Language: string implements HasLabel
             self::English => __('English'),
         };
     }
+
+    /**
+     * The language's name written in that language, for the admin language switch.
+     */
+    public function getNativeName(): string
+    {
+        return match ($this) {
+            self::Arabic => 'العربية',
+            self::English => 'English',
+        };
+    }
 }

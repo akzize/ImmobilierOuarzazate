@@ -24,6 +24,14 @@ test('a city is added with both names', function () {
         ->name_ar->toBe('سكورة');
 });
 
+test('the Arabic name must be written in Arabic', function () {
+    Livewire::test(ManageCities::class)
+        ->callAction('create', data: ['name_en' => 'Skoura', 'name_ar' => 'Skoura'])
+        ->assertHasFormErrors(['name_ar']);
+
+    expect(City::exists())->toBeFalse();
+});
+
 test('a city name cannot be added twice', function () {
     City::factory()->create(['name_en' => 'Skoura']);
 

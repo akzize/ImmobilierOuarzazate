@@ -21,7 +21,7 @@ class PropertyTypeFactory extends Factory
         return [
             'code' => fake()->unique()->regexify('[A-Z]{6}'),
             'group' => fake()->randomElement(PropertyGroup::cases()),
-            'label_ar' => fake()->word(),
+            'label_ar' => fake()->randomElement(['شقة', 'فيلا', 'منزل', 'رياض', 'أرض', 'مكتب']),
             'label_en' => fake()->unique()->word(),
             'position' => 0,
         ];

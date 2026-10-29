@@ -60,6 +60,10 @@ class PropertyExporter extends Exporter
             ExportColumn::make('address'),
             ExportColumn::make('internal_notes')
                 ->label(__('Internal notes')),
+            ExportColumn::make('closed_price')
+                ->label(__('Final price')),
+            ExportColumn::make('closed_at')
+                ->label(__('Closing date')),
             ExportColumn::make('published_at')
                 ->label(__('First published')),
             ExportColumn::make('created_at')

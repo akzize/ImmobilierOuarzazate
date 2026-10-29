@@ -6,6 +6,7 @@ use App\Enums\NavigationGroup;
 use App\Enums\PropertyGroup;
 use App\Filament\Resources\PropertyTypes\Pages\ManagePropertyTypes;
 use App\Models\PropertyType;
+use App\Rules\ArabicText;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -35,6 +36,16 @@ class PropertyTypeResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'label_en';
 
+    public static function getModelLabel(): string
+    {
+        return __('property type');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('property types');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -60,6 +71,7 @@ class PropertyTypeResource extends Resource
                     ->label(__('Label (Arabic)'))
                     ->required()
                     ->maxLength(255)
+                    ->rule(new ArabicText)
                     ->extraInputAttributes(['dir' => 'rtl']),
             ]);
     }

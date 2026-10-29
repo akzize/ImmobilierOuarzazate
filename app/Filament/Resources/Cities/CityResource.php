@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Cities;
 use App\Enums\NavigationGroup;
 use App\Filament\Resources\Cities\Pages\ManageCities;
 use App\Models\City;
+use App\Rules\ArabicText;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -31,6 +32,16 @@ class CityResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name_en';
 
+    public static function getModelLabel(): string
+    {
+        return __('city');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('cities');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -45,6 +56,7 @@ class CityResource extends Resource
                     ->label(__('Name (Arabic)'))
                     ->required()
                     ->maxLength(255)
+                    ->rule(new ArabicText)
                     ->extraInputAttributes(['dir' => 'rtl']),
             ]);
     }

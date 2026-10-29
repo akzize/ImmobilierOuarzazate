@@ -10,6 +10,7 @@ use App\Filament\Forms\Components\MapPicker;
 use App\Filament\Resources\Owners\Schemas\OwnerForm;
 use App\Models\PropertyImage;
 use App\Models\PropertyType;
+use App\Rules\ArabicText;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -174,10 +175,12 @@ class PropertyForm
                                     ->label(__('Title (Arabic)'))
                                     ->required()
                                     ->maxLength(255)
+                                    ->rule(new ArabicText)
                                     ->extraInputAttributes(['dir' => 'rtl']),
                                 RichEditor::make('description_ar')
                                     ->label(__('Description (Arabic)'))
                                     ->required()
+                                    ->rule(new ArabicText)
                                     ->extraInputAttributes(['dir' => 'rtl']),
                             ]),
                         Tab::make(__('English'))

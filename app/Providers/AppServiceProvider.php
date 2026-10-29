@@ -4,11 +4,15 @@ namespace App\Providers;
 
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Field;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TimePicker;
+use Filament\Infolists\Components\Entry;
 use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
+use Filament\Tables\Columns\Column;
+use Filament\Tables\Filters\BaseFilter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -27,7 +31,20 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureFilamentFields();
+        $this->translateGeneratedLabels();
         $this->registerFilamentAssets();
+    }
+
+    /**
+     * Labels Filament generates from field and column names (e.g. "Phone" for `phone`) go through the translator,
+     * so the Arabic panel needs no ->label() on every component. Translations live in lang/ar.json.
+     */
+    private function translateGeneratedLabels(): void
+    {
+        Field::configureUsing(fn (Field $field) => $field->translateLabel());
+        Entry::configureUsing(fn (Entry $entry) => $entry->translateLabel());
+        Column::configureUsing(fn (Column $column) => $column->translateLabel());
+        BaseFilter::configureUsing(fn (BaseFilter $filter) => $filter->translateLabel());
     }
 
     /**

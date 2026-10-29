@@ -32,6 +32,16 @@ class OwnerResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name_en';
 
+    public static function getModelLabel(): string
+    {
+        return __('owner');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('owners');
+    }
+
     /**
      * @return list<string>
      */

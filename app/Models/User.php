@@ -3,10 +3,12 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\Language;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,9 +16,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 
-#[Fillable(['name', 'email', 'password', 'avatar_path'])]
+#[Fillable(['name', 'email', 'password', 'avatar_path', 'locale'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable implements FilamentUser, HasAvatar
+class User extends Authenticatable implements FilamentUser, HasAvatar, HasLocalePreference
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -24,6 +26,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public const string AVATAR_DISK = 'public';
 
     public const string AVATAR_DIRECTORY = 'avatars';
+
+    /**
+     * Mirrors the database default: the admin panel is in English until the user switches.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'locale' => 'en',
+    ];
 
     /**
      * Remove avatar files that are no longer referenced.
@@ -53,7 +64,16 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'locale' => Language::class,
         ];
+    }
+
+    /**
+     * Language of the admin panel and of the notification emails this user receives.
+     */
+    public function preferredLocale(): string
+    {
+        return $this->locale->value;
     }
 
     /**

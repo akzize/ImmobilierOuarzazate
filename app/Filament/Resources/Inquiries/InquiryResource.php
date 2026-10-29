@@ -25,6 +25,16 @@ class InquiryResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'full_name';
 
+    public static function getModelLabel(): string
+    {
+        return __('inquiry');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('inquiries');
+    }
+
     /**
      * @return list<string>
      */

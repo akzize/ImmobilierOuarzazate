@@ -19,7 +19,7 @@ class AmenityFactory extends Factory
     {
         return [
             'code' => fake()->unique()->regexify('[a-z]{6}_[a-z]{6}'),
-            'label_ar' => fake()->word(),
+            'label_ar' => fake()->randomElement(['مسبح', 'حديقة', 'مصعد', 'تدفئة', 'شرفة', 'مرآب']),
             'label_en' => fake()->word(),
         ];
     }

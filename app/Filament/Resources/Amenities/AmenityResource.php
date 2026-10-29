@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Amenities;
 use App\Enums\NavigationGroup;
 use App\Filament\Resources\Amenities\Pages\ManageAmenities;
 use App\Models\Amenity;
+use App\Rules\ArabicText;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -32,6 +33,16 @@ class AmenityResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'label_en';
 
+    public static function getModelLabel(): string
+    {
+        return __('amenity');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('amenities');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -53,6 +64,7 @@ class AmenityResource extends Resource
                     ->label(__('Label (Arabic)'))
                     ->required()
                     ->maxLength(255)
+                    ->rule(new ArabicText)
                     ->extraInputAttributes(['dir' => 'rtl']),
             ]);
     }

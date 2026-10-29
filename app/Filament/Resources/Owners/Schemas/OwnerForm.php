@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Owners\Schemas;
 
+use App\Rules\ArabicText;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -23,6 +24,7 @@ class OwnerForm
                 TextInput::make('name_ar')
                     ->label(__('Name (Arabic)'))
                     ->maxLength(255)
+                    ->rule(new ArabicText)
                     ->extraInputAttributes(['dir' => 'rtl']),
                 TextInput::make('phone')
                     ->tel()
