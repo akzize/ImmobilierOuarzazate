@@ -10,6 +10,19 @@ use Illuminate\Support\Carbon;
 
 uses(RefreshDatabase::class);
 
+test('days on market count from the first publication while the listing is on the market', function (PropertyStatus $status, ?int $expectedDays) {
+    $this->travelTo(Carbon::create(2026, 10, 21, 12));
+    $property = Property::factory()->create(['status' => $status, 'published_at' => Carbon::create(2026, 9, 1, 9)]);
+
+    expect($property->daysOnMarket())->toBe($expectedDays);
+})->with([
+    'published' => [PropertyStatus::Published, 50],
+    'reserved' => [PropertyStatus::Reserved, 50],
+    'back to draft' => [PropertyStatus::Draft, null],
+    'sold or rented' => [PropertyStatus::SoldOrRented, null],
+    'archived' => [PropertyStatus::Archived, null],
+]);
+
 test('references are numbered sequentially per year', function () {
     $this->travelTo(Carbon::create(2026, 5, 1));
 

@@ -48,3 +48,16 @@ function something()
 {
     // ..
 }
+
+/**
+ * A GeoJSON outline of a small square plot in Ouarzazate, as the map field produces it.
+ *
+ * @return array{type: string, coordinates: list<list<list<float>>>}
+ */
+function squarePlot(): array
+{
+    return [
+        'type' => 'Polygon',
+        'coordinates' => [[[-6.94, 30.93], [-6.93, 30.93], [-6.93, 30.94], [-6.94, 30.94], [-6.94, 30.93]]],
+    ];
+}
