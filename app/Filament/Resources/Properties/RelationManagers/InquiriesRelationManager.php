@@ -2,21 +2,11 @@
 
 namespace App\Filament\Resources\Properties\RelationManagers;
 
-use App\Enums\InquiryStatus;
-use App\Enums\Language;
-use App\Models\Inquiry;
-use Filament\Actions\BulkActionGroup;
+use App\Filament\Resources\Inquiries\Schemas\InquiryForm;
+use App\Filament\Resources\Inquiries\Tables\InquiriesTable;
 use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 /**
@@ -36,85 +26,15 @@ class InquiriesRelationManager extends RelationManager
 
     public function form(Schema $schema): Schema
     {
-        return $schema
-            ->columns(2)
-            ->components([
-                TextInput::make('full_name')
-                    ->label(__('Full name'))
-                    ->required()
-                    ->maxLength(255),
-                TextInput::make('phone')
-                    ->tel()
-                    ->required()
-                    ->maxLength(30),
-                TextInput::make('email')
-                    ->email()
-                    ->maxLength(255),
-                Select::make('lang')
-                    ->label(__('Language'))
-                    ->options(Language::class)
-                    ->default(Language::Arabic)
-                    ->required(),
-                Textarea::make('message')
-                    ->required()
-                    ->rows(3)
-                    ->columnSpanFull(),
-                Select::make('status')
-                    ->options(InquiryStatus::class)
-                    ->default(InquiryStatus::New)
-                    ->required(),
-                Textarea::make('admin_notes')
-                    ->label(__('Internal notes'))
-                    ->rows(3)
-                    ->columnSpanFull(),
-            ]);
+        return InquiryForm::configure($schema);
     }
 
     public function table(Table $table): Table
     {
-        return $table
-            ->recordTitleAttribute('full_name')
-            ->defaultSort('created_at', 'desc')
-            ->columns([
-                TextColumn::make('full_name')
-                    ->label(__('Name'))
-                    ->description(fn (Inquiry $record): ?string => $record->email)
-                    ->searchable(['full_name', 'email']),
-                TextColumn::make('phone')
-                    ->searchable()
-                    ->copyable(),
-                TextColumn::make('message')
-                    ->limit(60)
-                    ->tooltip(fn (Inquiry $record): string => $record->message)
-                    ->toggleable(),
-                TextColumn::make('lang')
-                    ->label(__('Language'))
-                    ->badge()
-                    ->toggleable(),
-                TextColumn::make('status')
-                    ->badge(),
-                TextColumn::make('created_at')
-                    ->label(__('Received'))
-                    ->since()
-                    ->dateTimeTooltip()
-                    ->sortable(),
-            ])
-            ->filters([
-                SelectFilter::make('status')
-                    ->options(InquiryStatus::class),
-            ])
+        return InquiriesTable::configure($table)
             ->headerActions([
                 CreateAction::make()
                     ->label(__('Log inquiry')),
-            ])
-            ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
             ]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\InquirySource;
 use App\Enums\InquiryStatus;
 use App\Enums\Language;
 use App\Models\Inquiry;
@@ -23,10 +24,11 @@ class InquiryFactory extends Factory
         return [
             'property_id' => Property::factory(),
             'full_name' => fake()->name(),
-            'phone' => fake()->phoneNumber(),
+            'phone' => fake()->numerify('06########'),
             'email' => fake()->optional()->safeEmail(),
             'message' => fake()->paragraph(),
             'lang' => Language::Arabic,
+            'source' => InquirySource::Form,
             'status' => InquiryStatus::New,
             'admin_notes' => null,
         ];
